@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "eina",
+  "productName": "Eina",
   "version": "0.1.0",
   "identifier": "com.christopher.eina",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "eina",
+        "title": "Eina",
         "width": 800,
         "height": 600
       }
