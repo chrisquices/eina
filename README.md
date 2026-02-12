@@ -1,6 +1,6 @@
 <br />
 <div align="center">
-    <img src="./resources/eina-logo.svg" alt="Eina Logo" height="100">
+    <img src="/src-tauri/icons/icon.png" alt="Eina Logo" height="100">
 </div>
 
 <h1 align="center">Eina</h1>
@@ -43,13 +43,13 @@ Before installing, make sure you have the following:
 
 ### Option 1: Download Binary
 
-Download the latest `.app` or `.dmg` from [Releases](https://github.com/yourusername/eina/releases)
+Download the latest `.app` or `.dmg` from [Releases](https://github.com/chrisquices/eina/releases)
 
 ### Option 2: Build from Source
 
 1. **Clone the repository**
 ```bash
-   git clone https://github.com/yourusername/eina.git
+   git clone https://github.com/chrisquices/eina.git
    cd eina
 ```
 
@@ -65,7 +65,7 @@ Download the latest `.app` or `.dmg` from [Releases](https://github.com/youruser
 
 4. **Locate the built app**
 ```
-   src-tauri/target/release/bundle/macos/eina.app
+   src-tauri/target/release/bundle/macos/Eina.app
 ```
 
 ---
@@ -81,15 +81,14 @@ Download the latest `.app` or `.dmg` from [Releases](https://github.com/youruser
 3. **Manage processes**
     - Click any process to view details and logs
     - Use control buttons:
-        - ▶️ **Start** - Start a stopped process
-        - ⏸️ **Stop** - Stop a running process
-        - 🔄 **Restart** - Restart a process
-        - 🗑️ **Delete** - Remove a process from PM2
+        - **Start** - Start a stopped process
+        - **Stop** - Stop a running process
+        - **Restart** - Restart a process
+        - **Delete** - Remove a process from PM2
 
 4. **View logs**
     - Full ANSI color support
     - Automatically loads last 100 lines
-    - Updates when you select a different process
 
 ---
 
@@ -99,16 +98,7 @@ Download the latest `.app` or `.dmg` from [Releases](https://github.com/youruser
 - **Real-time Monitoring** - Auto-refreshing process list with CPU, memory, uptime, and restart count
 - **Log Viewer** - View process logs with full ANSI color support directly from PM2 log files
 - **Desktop Notifications** - Get notified when processes crash or restart unexpectedly
-- **Clean UI** - Dark mode interface built with Tailwind CSS and shadcn/ui components
 - **Lightweight** - Native desktop app with minimal resource usage
-
----
-
-## 🎯 Part of DanMachi Infrastructure Suite
-
-- **Eina** - PM2 process manager (this project)
-- **Hestia** - All-in-one personal management platform
-- **Lili** - Chrome extension companion
 
 ---
 
@@ -124,15 +114,6 @@ To build for production:
 ```bash
 npm run tauri build
 ```
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome!  
-Please fork the repository and create a pull request, or open an issue for discussion before making changes.
-
----
 
 ## 📄 License
 
