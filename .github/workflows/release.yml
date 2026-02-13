@@ -2,38 +2,50 @@ name: Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 jobs:
   release:
-    strategy:
-      matrix:
-        platform: [macos-latest]
-    
-    runs-on: ${{ matrix.platform }}
-    
+    runs-on: macos-latest
+
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-      
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-      
+          node-version: '20'
+
       - name: Install dependencies
         run: npm install
-      
-      - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Build app
+        run: npm run tauri build
+
+      - name: Create styled DMG
+        run: |
+          create-dmg \
+            --volname "Eina" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 80 \
+            --icon "Eina.app" 200 160 \
+            --app-drop-link 400 160 \
+            "Eina.dmg" \
+            "src-tauri/target/release/bundle/macos/Eina.app"
+
+      - name: Update latest release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest
+          files: Eina.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Eina ${{ github.ref_name }}'
-          releaseBody: 'See the assets below to download.'
-          releaseDraft: true
-          prerelease: false

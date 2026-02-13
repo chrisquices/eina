@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
+    "build:dmg": "rm -f Eina.dmg && tauri build && create-dmg --volname 'Eina' --window-pos 200 120 --window-size 600 400 --icon-size 80 --icon 'Eina.app' 200 160 --app-drop-link 400 160 'Eina.dmg' 'src-tauri/target/release/bundle/macos/Eina.app'",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
