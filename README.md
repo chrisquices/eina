@@ -46,7 +46,14 @@ Before installing, make sure you have the following:
 
 ### Option 1: Download Binary
 
+```bash
 Download the latest `.dmg` from [Releases](https://github.com/chrisquices/eina/releases)
+```
+
+**Remove quarantine attribute:**
+```bash
+ xattr -cr /path/to/Eina.app
+```
 
 ### Option 2: Build from Source
 
