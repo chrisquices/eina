@@ -250,7 +250,7 @@
                                             class="h-12 bg-card/60 cursor-pointer"
                                             onclick={() => selectProcess(index)}
                                     >
-                                        <TableCell class="font-medium uppercase rounded-l-4xl">
+                                        <TableCell class="font-medium uppercase rounded-l-4xl pl-8">
                                             <div class="flex items-center gap-4">
                                                 {#if process.status === 'online'}
                                                     <div class="h-5 w-5 rounded-full p-1 text-success bg-success/50 flex items-center">
@@ -278,7 +278,7 @@
                                             <span class="text-xs opacity-50">Uptime</span>
                                             {process.uptime}
                                         </TableCell>
-                                        <TableCell class="rounded-r-4xl">
+                                        <TableCell class="rounded-r-4xl pr-8">
                                             <span class="text-xs opacity-50">Restarts</span>
                                             {process.restarts}
                                         </TableCell>
