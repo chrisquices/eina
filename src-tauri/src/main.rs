@@ -106,15 +106,25 @@ fn pm2_delete(name: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-fn pm2_logs(name: String, _lines: Option<u32>) -> Result<String, String> {
-    let home = std::env::var("HOME").unwrap_or_default();
-    let out_log = format!("{}/.pm2/logs/{}-out.log", home, name);
-    let err_log = format!("{}/.pm2/logs/{}-error.log", home, name);
+fn pm2_logs(name: String, lines: Option<u32>) -> Result<String, String> {
+    let (pm2_path, path_env) = find_pm2()?;
+    let line_count = lines.unwrap_or(100).to_string();
 
-    let out_content = std::fs::read_to_string(&out_log).unwrap_or_default();
-    let err_content = std::fs::read_to_string(&err_log).unwrap_or_default();
+    let output = Command::new(&pm2_path)
+        .env("PATH", path_env)
+        .args(["logs", &name, "--lines", &line_count, "--nostream"])
+        .output()
+        .map_err(|e| format!("Failed to get logs: {}", e))?;
 
-    Ok(format!("{}\n{}", err_content, out_content))
+    let content = String::from_utf8_lossy(&output.stdout);
+
+    // Escape HTML characters
+    let escaped = content
+        .replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;");
+
+    Ok(escaped)
 }
 
 fn execute_pm2_command(args: Vec<&str>) -> Result<String, String> {

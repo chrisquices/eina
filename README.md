@@ -26,6 +26,9 @@
     </a>
 </p>
 
+## Preview
+![Eina Preview](/static/preview.png)
+
 ---
 
 ## ⚙️ Prerequisites
@@ -43,7 +46,7 @@ Before installing, make sure you have the following:
 
 ### Option 1: Download Binary
 
-Download the latest `.app` or `.dmg` from [Releases](https://github.com/chrisquices/eina/releases)
+Download the latest `.dmg` from [Releases](https://github.com/chrisquices/eina/releases)
 
 ### Option 2: Build from Source
 
@@ -65,7 +68,7 @@ Download the latest `.app` or `.dmg` from [Releases](https://github.com/chrisqui
 
 4. **Locate the built app**
 ```
-   src-tauri/target/release/bundle/macos/Eina.app
+   /<path-to-eina>/Eina.app
 ```
 
 ---
@@ -76,7 +79,6 @@ Download the latest `.app` or `.dmg` from [Releases](https://github.com/chrisqui
 
 2. **View your PM2 processes**
     - All running PM2 processes appear in the table
-    - Real-time updates every 2 seconds
 
 3. **Manage processes**
     - Click any process to view details and logs
@@ -89,16 +91,7 @@ Download the latest `.app` or `.dmg` from [Releases](https://github.com/chrisqui
 4. **View logs**
     - Full ANSI color support
     - Automatically loads last 100 lines
-
----
-
-## ✨ Features
-
-- **Process Management** - Start, stop, restart, and delete PM2 processes with a single click
-- **Real-time Monitoring** - Auto-refreshing process list with CPU, memory, uptime, and restart count
-- **Log Viewer** - View process logs with full ANSI color support directly from PM2 log files
-- **Desktop Notifications** - Get notified when processes crash or restart unexpectedly
-- **Lightweight** - Native desktop app with minimal resource usage
+    - Real-time updates every 5 seconds
 
 ---
 
@@ -108,11 +101,6 @@ To run in development mode:
 ```bash
 npm install
 npm run tauri dev
-```
-
-To build for production:
-```bash
-npm run tauri build
 ```
 
 ## 📄 License

@@ -10,6 +10,8 @@
     import Trash2Icon from "@lucide/svelte/icons/trash-2";
     import PauseIcon from "@lucide/svelte/icons/pause";
     import RotateCcwIcon from "@lucide/svelte/icons/rotate-ccw";
+    import CheckIcon from "@lucide/svelte/icons/check";
+    import XIcon from "@lucide/svelte/icons/x";
     import LoaderCircleIcon from "@lucide/svelte/icons/loader-circle";
     import {invoke} from "@tauri-apps/api/core";
     import {onMount} from "svelte";
@@ -25,6 +27,7 @@
     }
 
     let pm2Installed = $state(false);
+    let checking = $state(true);
     let processes = $state<PM2Process[]>([]);
     let selectedProcess = $state<number | null>(null);
     let logs = $state<string>("");
@@ -37,9 +40,10 @@
             pm2Installed = await invoke<boolean>("check_pm2_installed");
         } catch (e) {
             console.error("Failed to check PM2:", e);
+        } finally {
+            checking = false;
         }
     }
-
     async function loadProcesses(isRefresh = false) {
         try {
             if (!isRefresh) {
@@ -73,10 +77,18 @@
 
     const convert = new Convert();
 
+    let lastLogs = $state<string>("");
+
     async function loadLogs(name: string) {
         try {
             const rawLogs = await invoke<string>("pm2_logs", {name, lines: 100});
-            logs = convert.toHtml(rawLogs);
+            const newLogs = convert.toHtml(rawLogs);
+
+            // Only update if logs changed
+            if (newLogs !== lastLogs) {
+                logs = newLogs;
+                lastLogs = newLogs;
+            }
         } catch (e) {
             console.error("Failed to load logs:", e);
         }
@@ -145,17 +157,32 @@
         }
     }
 
+    let logRefreshInterval: ReturnType<typeof setInterval> | null = null;
+
     function selectProcess(index: number) {
         selectedProcess = index;
         loadLogs(processes[index].name);
+
+        // Clear previous interval
+        if (logRefreshInterval) {
+            clearInterval(logRefreshInterval);
+        }
+
+        // Refresh logs every 2 seconds
+        logRefreshInterval = setInterval(() => {
+            if (selectedProcess !== null) {
+                loadLogs(processes[selectedProcess].name);
+            }
+        }, 5000);
     }
 
     onMount(async () => {
         await checkPM2();
         if (pm2Installed) {
             await loadProcesses();
-            const interval = setInterval(() => loadProcesses(true), 2000);
-            return () => clearInterval(interval);
+            if (processes.length > 0) {
+                selectProcess(0);
+            }
         }
     });
 
@@ -187,10 +214,14 @@
 <Tooltip.Provider>
     <div class="h-screen font-mono !text-sm">
 
-        <main class="container mx-auto p-8 flex flex-col gap-6 h-full">
+        <main class="w-full p-8 flex flex-col gap-2 h-full">
 
-            {#if !pm2Installed}
-                <div class="bg-card/60 p-8 rounded-xl flex flex-col items-center justify-center gap-6 h-full">
+            {#if checking}
+                <div class="bg-card/60 p-8 rounded-4xl flex items-center justify-center h-full">
+                    <LoaderCircleIcon class="animate-spin" size={32}/>
+                </div>
+            {:else if !pm2Installed}
+                <div class="bg-card/60 p-8 rounded-4xl flex flex-col items-center justify-center gap-6 h-full">
                     <div class="text-center">
                         <h2 class="text-2xl font-bold mb-2">PM2 Not Installed</h2>
                         <p class="text-muted-foreground mb-4">PM2 is required to manage processes.</p>
@@ -200,7 +231,7 @@
                 </div>
             {:else}
                 <!-- Process Table -->
-                <div class="bg-card/60 p-8 rounded-xl overflow-hidden flex-shrink-0">
+                <div class=" overflow-hidden flex-shrink-0">
                     {#if error}
                         <div class="text-destructive mb-4">Error: {error}</div>
                     {/if}
@@ -213,32 +244,44 @@
                         </div>
                     {:else}
                         <Table>
-                            <TableHeader>
-                                <TableRow class="h-16">
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>CPU</TableHead>
-                                    <TableHead>Memory</TableHead>
-                                    <TableHead>Uptime</TableHead>
-                                    <TableHead>Restarts</TableHead>
-                                </TableRow>
-                            </TableHeader>
                             <TableBody>
                                 {#each processes as process, index}
                                     <TableRow
-                                            class="h-16 even:bg-primary/5 !rounded-xl cursor-pointer {selectedProcess === index ? 'bg-muted' : ''}"
+                                            class="h-12 bg-card/60 cursor-pointer"
                                             onclick={() => selectProcess(index)}
                                     >
-                                        <TableCell class="font-medium">{process.name}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={process.status === 'online' ? 'success' : 'default'}>
-                                                {process.status}
-                                            </Badge>
+                                        <TableCell class="font-medium uppercase rounded-l-4xl">
+                                            <div class="flex items-center gap-4">
+                                                {#if process.status === 'online'}
+                                                    <div class="h-5 w-5 rounded-full p-1 text-success bg-success/50 flex items-center">
+                                                        <CheckIcon size={16} class="  "/>
+                                                    </div>
+                                                {:else}
+                                                    <XIcon/>
+                                                {/if}
+                                                <div>{process.name}</div>
+                                            </div>
                                         </TableCell>
-                                        <TableCell>{process.cpu}</TableCell>
-                                        <TableCell>{process.memory}</TableCell>
-                                        <TableCell>{process.uptime}</TableCell>
-                                        <TableCell>{process.restarts}</TableCell>
+                                        <TableCell>
+                                            <span class="text-xs opacity-50">ID</span>
+                                            {process.pm_id}
+                                        </TableCell>
+                                        <TableCell>
+                                            <span class="text-xs opacity-50">CPU</span>
+                                            {process.cpu}
+                                        </TableCell>
+                                        <TableCell>
+                                            <span class="text-xs opacity-50">Memory</span>
+                                            {process.memory}
+                                        </TableCell>
+                                        <TableCell>
+                                            <span class="text-xs opacity-50">Uptime</span>
+                                            {process.uptime}
+                                        </TableCell>
+                                        <TableCell class="rounded-r-4xl">
+                                            <span class="text-xs opacity-50">Restarts</span>
+                                            {process.restarts}
+                                        </TableCell>
                                     </TableRow>
                                 {/each}
                             </TableBody>
@@ -248,9 +291,9 @@
 
                 <!-- Selected Process Details -->
                 {#if selectedProcess !== null && processes[selectedProcess]}
-                    <div class="bg-card/60 flex-1 rounded-xl p-8 flex flex-col gap-8 flex-grow min-h-0">
+                    <div class="bg-card/60 flex-1 rounded-4xl p-8 flex flex-col gap-8 flex-grow min-h-0">
                         <div class="flex justify-between items-center">
-                            <h2 class="text-xl font-semibold">{processes[selectedProcess].name}</h2>
+                            <h2 class="text-xl font-semibold uppercase">{processes[selectedProcess].name}</h2>
                             <div class="flex gap-4">
                                 <Tooltip.Root>
                                     <Tooltip.Trigger>
@@ -334,34 +377,18 @@
                             </div>
                         </div>
 
-                        <div class="flex flex-wrap gap-8">
-                            <div>
-                                <span class="text-muted-foreground">ID:</span>
-                                <span class=" font-mono">{processes[selectedProcess].pm_id}</span>
-                            </div>
-                            <div>
-                                <span class="text-muted-foreground">Restarts:</span>
-                                <span class="">{processes[selectedProcess].restarts}</span>
-                            </div>
-                            <div>
-                                <span class="text-muted-foreground">Uptime:</span>
-                                <span class="">{processes[selectedProcess].uptime}</span>
-                            </div>
-                        </div>
-
                         <!-- Log Viewer -->
-                        <div class="flex-1 rounded overflow-y-auto whitespace-pre-wrap">
+                        <div class="flex-1 rounded overflow-y-auto whitespace-pre-wrap !text-xs">
                             {@html logs || "No logs available"}
                         </div>
                     </div>
                 {:else}
-                    <div class="bg-card/60 flex-1 rounded-xl flex items-center justify-center text-muted-foreground">
+                    <div class="bg-card/60 flex-1 rounded-4xl flex items-center justify-center text-muted-foreground">
                         Select a process to view details
                     </div>
                 {/if}
             {/if}
         </main>
-
     </div>
 </Tooltip.Provider>
 
